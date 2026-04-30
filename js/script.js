@@ -1,24 +1,19 @@
 document.addEventListener('DOMContentLoaded', () => {
-    // Mobile Navigation Toggle
+    // 1. Mobile Navigation
     const hamburger = document.querySelector('.hamburger');
     const navLinks = document.querySelector('.nav-links');
-
     if (hamburger) {
         hamburger.addEventListener('click', () => {
             navLinks.classList.toggle('active');
             const icon = hamburger.querySelector('i');
-            if (navLinks.classList.contains('active')) {
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-times');
-            } else {
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
-            }
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
         });
     }
 
-    // Shopping Cart Logic
+    // 2. Shopping Cart & Menu Logic
     let cart = [];
+    window.orders = window.orders || {};
     const cartIcon = document.getElementById('cart-icon');
     const cartSidebar = document.getElementById('cart-sidebar');
     const closeCart = document.getElementById('close-cart');
@@ -27,86 +22,60 @@ document.addEventListener('DOMContentLoaded', () => {
     const cartCount = document.getElementById('cart-count');
 
     if (cartIcon && cartSidebar && closeCart) {
-        cartIcon.addEventListener('click', (e) => {
-            e.preventDefault();
-            cartSidebar.classList.toggle('active');
-        });
-
-        closeCart.addEventListener('click', () => {
-            cartSidebar.classList.remove('active');
-        });
+        cartIcon.addEventListener('click', (e) => { e.preventDefault(); cartSidebar.classList.toggle('active'); });
+        closeCart.addEventListener('click', () => { cartSidebar.classList.remove('active'); });
 
         window.updateCartUI = function() {
             cartItemsContainer.innerHTML = '';
             let total = 0;
             if (cart.length === 0) {
                 cartItemsContainer.innerHTML = '<p style="text-align:center; color:#999; margin-top:50px;">Your cart is empty.</p>';
-                cartCount.innerText = "0";
-                cartTotalPrice.innerText = "₹0";
-                return;
+                cartCount.innerText = "0"; cartTotalPrice.innerText = "₹0"; return;
             }
             cart.forEach((item, index) => {
                 total += item.price;
                 const itemDiv = document.createElement('div');
                 itemDiv.className = 'cart-item';
-                itemDiv.innerHTML = `
-                    <div class="cart-item-info">
-                        <h4>${item.name}</h4>
-                        <p>₹${item.price}</p>
-                    </div>
-                    <i class="fas fa-trash remove-item" onclick="removeFromCart(${index})"></i>
-                `;
+                itemDiv.innerHTML = `<div class="cart-item-info"><h4>${item.name}</h4><p>₹${item.price}</p></div><i class="fas fa-trash remove-item" onclick="removeFromCart(${index})"></i>`;
                 cartItemsContainer.appendChild(itemDiv);
             });
-            cartCount.innerText = cart.length;
-            cartTotalPrice.innerText = "₹" + total;
+            cartCount.innerText = cart.length; cartTotalPrice.innerText = "₹" + total;
         };
 
         window.addToCart = function(name, price) {
-            cart.push({ name, price });
-            updateCartUI();
-            cartSidebar.classList.add('active');
+            cart.push({ name, price }); updateCartUI(); cartSidebar.classList.add('active');
         };
 
         window.removeFromCart = function(index) {
-            cart.splice(index, 1);
-            updateCartUI();
+            cart.splice(index, 1); updateCartUI();
         };
 
         document.querySelectorAll('.menu-item').forEach(item => {
             const btn = item.querySelector('.btn-primary');
-            const name = item.querySelector('h3').innerText;
-            const priceText = item.querySelector('.price').innerText;
-            const price = parseInt(priceText.replace('₹', '').replace(',', ''));
             if (btn) {
-                btn.onclick = function(e) {
-                    e.preventDefault();
-                    window.addToCart(name, price);
-                };
+                const name = item.querySelector('h3').innerText;
+                const price = parseInt(item.querySelector('.price').innerText.replace('₹', '').replace(',', ''));
+                btn.onclick = function(e) { e.preventDefault(); window.addToCart(name, price); };
             }
         });
     }
 
-    // Checkout Logic
-    window.orders = window.orders || {};
+    // 3. Email & Checkout Logic
     window.sendOrderEmail = function(orderId, items, method, source, customerName = "Guest") {
         const formData = new FormData();
-        formData.append('subject', `New Order: ${orderId}`);
-        formData.append('Customer', customerName);
+        formData.append('subject', `New Order: ${orderId} - ${customerName}`);
+        formData.append('Customer Name', customerName);
         formData.append('Order ID', orderId);
-        formData.append('Items', items);
-        fetch('https://formspree.io/f/meenjwqv', { method: 'POST', body: formData, headers: { 'Accept': 'application/json' } });
-    };
-
-    window.openCheckoutModal = function() {
-        if(cart.length === 0) return alert("Your cart is empty!");
-        const modal = document.getElementById('checkout-modal');
-        if(modal) modal.style.display = 'flex';
+        formData.append('Items Ordered', items);
+        formData.append('Method', method);
+        formData.append('Source', source);
+        fetch('https://formspree.io/f/meenjwqv', { method: 'POST', body: formData, headers: { 'Accept': 'application/json' } })
+            .then(() => console.log("Email sent!")).catch(err => console.error(err));
     };
 });
 
 // ==========================================
-// CHATBOT LOGIC (GLOBAL SCOPE FOR STABILITY)
+// CHATBOT ENGINE (GLOBAL SCOPE)
 // ==========================================
 const p1 = "sk-proj-BiR0nIJBDzar0JMS37B-pUtHsOfvQ1FYS7CIJ5kmA-8";
 const p2 = "Cc9ETtBUiXrCPOIPKfCIKJUVMpCE3rZT3BlbkFJm6f-FBgdLS";
@@ -122,7 +91,7 @@ window.toggleChat = function() {
     if (win) {
         win.classList.toggle('active');
         if (win.classList.contains('active') && body.children.length === 0) {
-            addMessage('Namaste! 🙏 I am Lumina AI. How can I help you explore our menu today?', 'bot-msg');
+            addMessage('Namaste! 🙏 I am Lumina AI. I can help you explore our Indian fusion menu and take your order!', 'bot-msg');
         }
     }
 };
@@ -138,7 +107,11 @@ function addMessage(text, className) {
 }
 
 async function getOpenAIResponse(userMessage) {
-    const systemPrompt = `You are "Lumina AI" for "Lumina Indian Bistro". Menu: Chai (₹120), Coffee (₹150), Samosa (₹100), Vada Pav (₹80), Butter Chicken (₹250), Paneer (₹200), Dosa (₹180), Gulab Jamun (₹90). Format: HTML.`;
+    const systemPrompt = `You are "Lumina AI" for "Lumina Indian Bistro". 
+    MENU: Chai (₹120), Coffee (₹150), Samosa (₹100), Vada Pav (₹80), Butter Chicken (₹250), Paneer (₹200), Dosa (₹180), Gulab Jamun (₹90). 
+    FORMAT: Use HTML tags (<b>, <br>, <ul>). 
+    ORDERING: When order is ready, ask name, then end with: [FINALIZE_ORDER: items | Name: customer_name]`;
+    
     const messages = [{ role: "system", content: systemPrompt }, ...chatHistory, { role: "user", content: userMessage }];
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
         method: 'POST',
@@ -152,7 +125,6 @@ async function getOpenAIResponse(userMessage) {
     return botText;
 }
 
-// Attach listeners when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     const chatForm = document.getElementById('chat-form');
     const chatInput = document.getElementById('chat-input');
@@ -166,23 +138,40 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!message) return;
             addMessage(message, 'user-msg');
             chatInput.value = '';
+
             const typingDiv = document.createElement('div');
             typingDiv.className = 'message bot-msg typing';
             typingDiv.innerHTML = '<span class="dot"></span><span class="dot"></span><span class="dot"></span>';
             chatBody.appendChild(typingDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+
             try {
                 const response = await getOpenAIResponse(message);
                 typingDiv.remove();
+
                 if (response.includes('[FINALIZE_ORDER:')) {
                     const match = response.match(/\[FINALIZE_ORDER: (.*?) \| Name: (.*?)\]/);
-                    const orderId = "LMN-" + Math.floor(1000 + Math.random() * 9000);
-                    addMessage(response.replace(/\[FINALIZE_ORDER:.*?\]/g, '').trim() + `<br><strong>Order ID: ${orderId}</strong>`, 'bot-msg');
+                    if (match) {
+                        const items = match[1];
+                        const name = match[2];
+                        const orderId = "LMN-" + Math.floor(1000 + Math.random() * 9999);
+                        
+                        // TRACK & EMAIL
+                        window.orders = window.orders || {};
+                        window.orders[orderId] = { customer: name, items: items, status: "Preparing" };
+                        if (window.sendOrderEmail) {
+                            window.sendOrderEmail(orderId, items, "AI Chat", "Lumina AI", name);
+                        }
+                        
+                        const cleanMsg = response.replace(/\[FINALIZE_ORDER:.*?\]/g, '').trim();
+                        addMessage(cleanMsg + `<br><br><strong>Order ID: ${orderId}</strong>`, 'bot-msg');
+                    }
                 } else {
                     addMessage(response, 'bot-msg');
                 }
             } catch (err) {
                 typingDiv.remove();
-                addMessage("I'm experiencing high traffic. Please try again soon!", 'bot-msg');
+                addMessage("Namaste! I'm experiencing high traffic. Please try again or use our Menu page!", 'bot-msg');
             }
         });
     }
