@@ -63,19 +63,18 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Email & Checkout Logic
     window.sendOrderEmail = function(orderId, items, method, source, customerName = "Guest") {
         const formData = new FormData();
-        formData.append('subject', `New Order: ${orderId} - ${customerName}`);
-        formData.append('Customer Name', customerName);
+        formData.append('subject', `Lumina Order: ${orderId} [${customerName}]`);
+        formData.append('Customer', customerName);
         formData.append('Order ID', orderId);
-        formData.append('Items Ordered', items);
+        formData.append('Items', items);
         formData.append('Method', method);
         formData.append('Source', source);
-        fetch('https://formspree.io/f/meenjwqv', { method: 'POST', body: formData, headers: { 'Accept': 'application/json' } })
-            .then(() => console.log("Email sent!")).catch(err => console.error(err));
+        fetch('https://formspree.io/f/meenjwqv', { method: 'POST', body: formData, headers: { 'Accept': 'application/json' } });
     };
 });
 
 // ==========================================
-// CHATBOT ENGINE (GLOBAL SCOPE)
+// CHATBOT ENGINE (PREMIUM VERSION)
 // ==========================================
 const p1 = "sk-proj-BiR0nIJBDzar0JMS37B-pUtHsOfvQ1FYS7CIJ5kmA-8";
 const p2 = "Cc9ETtBUiXrCPOIPKfCIKJUVMpCE3rZT3BlbkFJm6f-FBgdLS";
@@ -91,7 +90,7 @@ window.toggleChat = function() {
     if (win) {
         win.classList.toggle('active');
         if (win.classList.contains('active') && body.children.length === 0) {
-            addMessage('Namaste! 🙏 I am Lumina AI. I can help you explore our Indian fusion menu and take your order!', 'bot-msg');
+            addMessage('<b>Namaste!</b> 🙏 I am Lumina AI. I am ready to curate your Indian Fusion experience. How may I serve you today?', 'bot-msg');
         }
     }
 };
@@ -107,16 +106,17 @@ function addMessage(text, className) {
 }
 
 async function getOpenAIResponse(userMessage) {
-    const systemPrompt = `You are "Lumina AI" for "Lumina Indian Bistro". 
-    MENU: Chai (₹120), Coffee (₹150), Samosa (₹100), Vada Pav (₹80), Butter Chicken (₹250), Paneer (₹200), Dosa (₹180), Gulab Jamun (₹90). 
-    FORMAT: Use HTML tags (<b>, <br>, <ul>). 
-    ORDERING: When order is ready, ask name, then end with: [FINALIZE_ORDER: items | Name: customer_name]`;
+    const systemPrompt = `You are "Lumina AI", the sophisticated virtual concierge for "Lumina Indian Bistro". 
+    OUR MENU: Chai (₹120), Coffee (₹150), Samosa (₹100), Vada Pav (₹80), Butter Chicken (₹250), Paneer (₹200), Dosa (₹180), Gulab Jamun (₹90). 
+    TONE: Professional and Welcoming. 
+    FORMATTING: Always use <b> and <br>. No Markdown. 
+    CRITICAL: As soon as you have the items and the guest's name, you MUST finalize the order immediately by adding this tag at the very end of your message: [FINALIZE_ORDER: items | Name: name]`;
     
     const messages = [{ role: "system", content: systemPrompt }, ...chatHistory, { role: "user", content: userMessage }];
     const res = await fetch("https://api.openai.com/v1/chat/completions", {
         method: 'POST',
         headers: { 'Authorization': `Bearer ${OPENAI_API_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify({ model: "gpt-4o-mini", messages: messages })
+        body: JSON.stringify({ model: "gpt-4o-mini", messages: messages, temperature: 0.7 })
     });
     const data = await res.json();
     const botText = data.choices[0].message.content;
@@ -154,24 +154,31 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (match) {
                         const items = match[1];
                         const name = match[2];
-                        const orderId = "LMN-" + Math.floor(1000 + Math.random() * 9999);
+                        const orderId = "LMN-" + Math.floor(10000 + Math.random() * 89999);
                         
-                        // TRACK & EMAIL
-                        window.orders = window.orders || {};
-                        window.orders[orderId] = { customer: name, items: items, status: "Preparing" };
-                        if (window.sendOrderEmail) {
-                            window.sendOrderEmail(orderId, items, "AI Chat", "Lumina AI", name);
-                        }
+                        // Track & Email
+                        window.sendOrderEmail(orderId, items, "AI Chat", "Lumina AI", name);
                         
                         const cleanMsg = response.replace(/\[FINALIZE_ORDER:.*?\]/g, '').trim();
-                        addMessage(cleanMsg + `<br><br><strong>Order ID: ${orderId}</strong>`, 'bot-msg');
+                        const receipt = `
+                            <div style="border: 2px dashed #3e2723; padding: 15px; margin-top: 10px; border-radius: 8px; background: #fff;">
+                                <div style="text-align:center; font-weight:bold; margin-bottom:10px;">LUMINA BISTRO RECEIPT</div>
+                                <hr style="border:0; border-top:1px solid #eee;">
+                                <b>Order ID:</b> ${orderId}<br>
+                                <b>Guest:</b> ${name}<br>
+                                <b>Items:</b> ${items}<br>
+                                <hr style="border:0; border-top:1px solid #eee;">
+                                <div style="font-size:0.85rem; text-align:center; color:#666;">Thank you for dining with Lumina AI!</div>
+                            </div>
+                        `;
+                        addMessage(cleanMsg + receipt, 'bot-msg');
                     }
                 } else {
                     addMessage(response, 'bot-msg');
                 }
             } catch (err) {
                 typingDiv.remove();
-                addMessage("Namaste! I'm experiencing high traffic. Please try again or use our Menu page!", 'bot-msg');
+                addMessage("I apologize, but my neural network is busy. Please try again or use our Menu page!", 'bot-msg');
             }
         });
     }
