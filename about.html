@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us | Lumina Bistro</title>
+    <meta name="description" content="Learn about the story behind Lumina Bistro, our passion for global cuisine, and our AI-driven approach to the perfect meal.">
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <header>
+        <nav class="navbar">
+            <a href="index.html" class="logo">Lumina<span>Indian Bistro</span></a>
+            <ul class="nav-links">
+                <li><a href="index.html">Home</a></li>
+                <li><a href="about.html" class="active">About</a></li>
+                <li><a href="menu.html">Menu</a></li>
+                <li><a href="contact.html">Contact</a></li>
+            </ul>
+            <div class="hamburger">
+                <i class="fas fa-bars"></i>
+            </div>
+        </nav>
+    </header>
+
+    <div class="page-header">
+        <h1>Our Story</h1>
+        <p>Blending tradition with artificial intelligence.</p>
+    </div>
+
+    <!-- About Section -->
+    <section class="section">
+        <div class="about-grid">
+            <div class="about-img">
+                <img src="https://images.unsplash.com/photo-1497935586351-b67a49e012bf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Barista making coffee at Lumina Cafe">
+            </div>
+            <div class="about-text">
+                <h2>The Art & Science of Indian Flavors</h2>
+                <p>Founded in 2024, Lumina Indian Bistro started with a simple question: What happens when you combine generations of Indian culinary heritage with the precision of modern Artificial Intelligence?</p>
+                <p>The answer is a consistently perfect dining experience, every single time. Our AI models have analyzed millions of spice profiles, cooking temperatures, and slow-cooking techniques to discover the absolute optimal parameters for each traditional Indian dish on our menu.</p>
+                <p>But we haven't lost the human touch. Our passionate human chefs work hand-in-hand with our smart systems to bring you authentic aromas, warm smiles, and a cozy atmosphere that celebrates the spirit of India.</p>
+                <a href="menu.html" class="btn btn-primary" style="margin-top: 1rem;">Explore Our Menu</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Chatbot Widget -->
+    <div class="chatbot-widget">
+        <div class="chatbot-btn" id="chatbot-btn">
+            <i class="fas fa-comment-dots"></i>
+        </div>
+        <div class="chatbot-window" id="chatbot-window">
+            <div class="chat-header">
+                <h3>Lumina AI Assistant</h3>
+                <i class="fas fa-times close-chat" id="close-chat"></i>
+            </div>
+            <div class="chat-body" id="chat-body"></div>
+            <form class="chat-input" id="chat-form">
+                <input type="text" id="chat-input" placeholder="Type a message..." autocomplete="off">
+                <button type="submit"><i class="fas fa-paper-plane"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <div class="social-links">
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+        </div>
+        <p>&copy; 2026 Lumina Indian Bistro. All rights reserved. Created with AI.</p>
+    </footer>
+
+    <script src="js/script.js"></script>
+</body>
+</html>
