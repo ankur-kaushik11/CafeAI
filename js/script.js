@@ -204,12 +204,19 @@ document.addEventListener('DOMContentLoaded', () => {
     
     let chatHistory = [];
 
-    if (chatbotBtn && chatbotWindow) {
-        chatbotBtn.addEventListener('click', () => {
+    // Global toggle function for the button's onclick
+    window.toggleChat = function() {
+        if (chatbotWindow) {
             chatbotWindow.classList.toggle('active');
             if(chatbotWindow.classList.contains('active') && chatBody.children.length === 0) {
                 addMessage('Namaste! 🙏 I am Lumina AI. How can I help you explore our Indian fusion menu today?', 'bot-msg');
             }
+        }
+    };
+
+    if (chatbotBtn && chatbotWindow) {
+        chatbotBtn.addEventListener('click', () => {
+            window.toggleChat();
         });
 
         closeChat.addEventListener('click', () => {
